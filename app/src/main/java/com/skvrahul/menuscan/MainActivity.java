@@ -74,17 +74,22 @@ public class MainActivity extends AppCompatActivity {
                     boolean hasLowStorage = registerReceiver(null, lowstorageFilter) != null;
 
                     if (hasLowStorage) {
-                        Toast.makeText(this,"Low Storage", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "Low Storage", Toast.LENGTH_LONG).show();
                         Log.w("textRecognize", "Low Storage");
                     }
+                }else{
                     Frame imageFrame = new Frame.Builder()
                             .setBitmap(bitmap)
                             .build();
+                    Log.i("textScan", "start");
                     SparseArray<TextBlock> textBlocks = textRecognizer.detect(imageFrame);
-
+                    Log.i("textScan", "end");
+                    Toast.makeText(getBaseContext(), ""+textBlocks.size(), Toast.LENGTH_LONG).show();
+                    Log.i("textScan", textBlocks.size()+"");
                     for (int i = 0; i < textBlocks.size(); i++) {
                         TextBlock textBlock = textBlocks.get(textBlocks.keyAt(i));
-                        Log.i("textRecognize", textBlock.getValue());
+                        Toast.makeText(getBaseContext(), textBlock.getValue(),Toast.LENGTH_LONG).show();
+
                     }
                 }
             }catch (IOException e){
