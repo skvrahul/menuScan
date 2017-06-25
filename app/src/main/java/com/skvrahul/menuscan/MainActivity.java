@@ -20,21 +20,27 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.gms.vision.Frame;
+import com.google.android.gms.vision.text.Text;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 import com.scanlibrary.ScanActivity;
 import com.scanlibrary.ScanConstants;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     int REQUEST_CODE = 99;
     int preferences = ScanConstants.OPEN_CAMERA;
     Button scanButton;
     ImageView imageView;
-    Intent intent;
+    Intent cameraIntent;
+    Intent resultsIntent;
+    ArrayList<String> foods = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        foods = new ArrayList<>();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         scanButton = (Button)findViewById(R.id.scanButton);
@@ -42,14 +48,15 @@ public class MainActivity extends AppCompatActivity {
         scanButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                intent = new Intent(getApplicationContext(),ScanActivity.class);
-                intent.putExtra(ScanConstants.OPEN_INTENT_PREFERENCE, preferences);
+                cameraIntent = new Intent(getApplicationContext(),ScanActivity.class);
+                cameraIntent.putExtra(ScanConstants.OPEN_INTENT_PREFERENCE, preferences);
+                resultsIntent = new Intent(getApplicationContext(),ResultActivity.class);
                 if (checkSelfPermission(Manifest.permission.CAMERA)
                         != PackageManager.PERMISSION_GRANTED) {
                     requestPermissions(new String[]{Manifest.permission.CAMERA},
                             97);
                 }else{
-                    startActivityForResult(intent, REQUEST_CODE);
+                    startActivityForResult(cameraIntent, REQUEST_CODE);
                 }
             }
         });
@@ -81,17 +88,17 @@ public class MainActivity extends AppCompatActivity {
                     Frame imageFrame = new Frame.Builder()
                             .setBitmap(bitmap)
                             .build();
-                    Log.i("textScan", "start");
                     SparseArray<TextBlock> textBlocks = textRecognizer.detect(imageFrame);
-                    Log.i("textScan", "end");
-                    Toast.makeText(getBaseContext(), ""+textBlocks.size(), Toast.LENGTH_LONG).show();
-                    Log.i("textScan", textBlocks.size()+"");
-                    for (int i = 0; i < textBlocks.size(); i++) {
-                        TextBlock textBlock = textBlocks.get(textBlocks.keyAt(i));
-                        Toast.makeText(getBaseContext(), textBlock.getValue(),Toast.LENGTH_LONG).show();
 
+                    Log.i("textScan", "Found "+textBlocks.size()+" blocks");
+                    processText(textBlocks);
+                    for(String text:foods){
+                        Log.i("textScan", text);
                     }
+                    resultsIntent.putStringArrayListExtra("foods",foods);
+                    startActivity(resultsIntent);
                 }
+
             }catch (IOException e){
                 e.printStackTrace();
             }
@@ -104,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == 97) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Now user should be able to use camera
-                startActivityForResult(intent, REQUEST_CODE);
+                startActivityForResult(cameraIntent, REQUEST_CODE);
             }
             else {
                 // Your app will not have this permission. Turn off all functions
@@ -112,5 +119,15 @@ public class MainActivity extends AppCompatActivity {
                 // original question
             }
         }
+    }
+    private void processText(SparseArray<TextBlock> textBlocks){
+        for (int i = 0; i < textBlocks.size(); ++i) {
+            TextBlock item = textBlocks.valueAt(i);
+            List<? extends Text> texts = item.getComponents();
+            for(Text t:texts){
+                foods.add(t.getValue());
+            }
+        }
+
     }
 }

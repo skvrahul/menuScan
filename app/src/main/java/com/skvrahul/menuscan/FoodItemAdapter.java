@@ -1,6 +1,7 @@
 package com.skvrahul.menuscan;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,8 +38,9 @@ public class FoodItemAdapter extends RecyclerView.Adapter<FoodItemAdapter.MyView
     public void onBindViewHolder(MyViewHolder holder, int position) {
         FoodItemModel foodItem = foods.get(position);
         holder.titleTV.setText(foodItem.getTitle());
-        holder.caloriesTV.setText(foodItem.getCalories());
+        //holder.caloriesTV.setText(foodItem.getCalories());
         holder.descSV.setText(foodItem.getDesc());
+        Log.i("picasso", "onBindViewHolder: "+foodItem.getImgUrl());
         Picasso.with(holder.imageIV.getContext()).load(foodItem.getImgUrl()).into(holder.imageIV);
     }
 

@@ -5,6 +5,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -31,6 +32,7 @@ public class ResultFragment extends Fragment {
     private Button grayModeButton;
     private Button bwButton;
     private Bitmap transformed;
+    private Button rotateBtn;
     private static ProgressDialogFragment progressDialogFragment;
 
     public ResultFragment() {
@@ -44,6 +46,7 @@ public class ResultFragment extends Fragment {
     }
 
     private void init() {
+        rotateBtn = (Button)view.findViewById(R.id.rotateButton);
         scannedImageView = (ImageView) view.findViewById(R.id.scannedImage);
         originalButton = (Button) view.findViewById(R.id.original);
         originalButton.setOnClickListener(new OriginalButtonClickListener());
@@ -57,6 +60,12 @@ public class ResultFragment extends Fragment {
         setScannedImage(bitmap);
         doneButton = (Button) view.findViewById(R.id.doneButton);
         doneButton.setOnClickListener(new DoneButtonClickListener());
+        rotateBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                rotateImg();
+            }
+        });
     }
 
     private Bitmap getBitmap() {
@@ -79,7 +88,19 @@ public class ResultFragment extends Fragment {
     public void setScannedImage(Bitmap scannedImage) {
         scannedImageView.setImageBitmap(scannedImage);
     }
+    public void rotateImg(){
+        Bitmap bitmap;
+        if(transformed!=null){
+            bitmap = transformed;
+        }else{
+            bitmap = original;
+        }
 
+        transformed =RotateBitmap(bitmap,90);
+        scannedImageView.setImageBitmap(transformed);
+
+
+    }
     private class DoneButtonClickListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
@@ -226,7 +247,12 @@ public class ResultFragment extends Fragment {
             });
         }
     }
-
+    public static Bitmap RotateBitmap(Bitmap source, float angle)
+    {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(angle);
+        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
+    }
     protected synchronized void showProgressDialog(String message) {
         if (progressDialogFragment != null && progressDialogFragment.isVisible()) {
             // Before creating another loading dialog, close all opened loading dialogs (if any)
