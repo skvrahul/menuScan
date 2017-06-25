@@ -10,7 +10,17 @@ class FoodItemModel{
     private String Title;
     private String ImgUrl;
     private String Desc;
+    private String Type;
     int calories;
+
+    public String getType() {
+        return Type;
+    }
+
+    public void setType(String type) {
+        Type = type;
+    }
+
     List<String> ingredients;
 
     public String getTitle() {

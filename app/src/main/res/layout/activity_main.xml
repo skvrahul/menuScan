@@ -16,13 +16,4 @@
         android:text="Scan Menu"
         android:onClick="scanMenuClicked"/>
 
-    <ImageView
-        android:id="@+id/scannedImageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="11dp"
-        app:srcCompat="@drawable/circle"
-        android:layout_above="@+id/scanButton"
-        android:layout_alignLeft="@+id/scanButton"
-        android:layout_alignStart="@+id/scanButton" />
 </RelativeLayout>

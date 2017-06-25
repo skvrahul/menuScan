@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -40,11 +41,10 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<String> foods = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        foods = new ArrayList<>();
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
         scanButton = (Button)findViewById(R.id.scanButton);
-        imageView = (ImageView)findViewById(R.id.scannedImageView);
         scanButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -71,7 +71,6 @@ public class MainActivity extends AppCompatActivity {
                 TextRecognizer textRecognizer = new TextRecognizer.Builder(this).build();
                 bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(),uri);
                 getContentResolver().delete(uri, null, null);
-                imageView.setImageBitmap(bitmap);
                 if(!textRecognizer.isOperational()) {
                     Log.w("textRecognize", "Detector dependencies are not yet available.");
 
@@ -110,14 +109,17 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == 97) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Now user should be able to use camera
-                startActivityForResult(cameraIntent, REQUEST_CODE);
+                if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                            96);
+                }
             }
-            else {
-                // Your app will not have this permission. Turn off all functions
-                // that require this permission or it will force close like your
-                // original question
-            }
+        }else if(requestCode == 96){
+            // Now user should be able to use camera
+            startActivityForResult(cameraIntent, REQUEST_CODE);
+        }else{
+            Toast.makeText(getBaseContext(),"No permission granted",Toast.LENGTH_LONG).show();
         }
     }
     private void processText(SparseArray<TextBlock> textBlocks){

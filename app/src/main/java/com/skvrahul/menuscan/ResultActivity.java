@@ -1,16 +1,11 @@
 package com.skvrahul.menuscan;
 
-import android.app.ProgressDialog;
-import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.LinearSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
@@ -25,6 +20,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class ResultActivity extends AppCompatActivity {
     List<String> foods = new ArrayList<>();
@@ -33,15 +29,22 @@ public class ResultActivity extends AppCompatActivity {
     int requestPending= 0;
     RecyclerView foodsRecylerView;
     private FoodItemAdapter adapter;
+    List<String> type_dict = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        initDict();
+        setTitle("Dishes");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_result);
         foodsRecylerView = (RecyclerView) findViewById(R.id.foodItemRV);
         foods = getIntent().getStringArrayListExtra("foods");
         process();
     }
-
+    @Override
+    protected void onStop() {
+        super.onStop();
+        foods = new ArrayList<>();
+    }
     private void process() {
         Log.i("text", "process: called.foods size"+foods.size());
         RequestQueue rQueue = Volley.newRequestQueue(ResultActivity.this);
@@ -58,7 +61,8 @@ public class ResultActivity extends AppCompatActivity {
 //                    .appendQueryParameter("key", "AIzaSyAKSXq2h_SdSyadKsBX1y3EChyaPv12W2E")
 //                    .appendQueryParameter("limit","1");
 //            String url = builder.build().toString();
-            String url = "https://kgsearch.googleapis.com/v1/entities:search?query="+foods.get(i)+"&key=AIzaSyAKSXq2h_SdSyadKsBX1y3EChyaPv12W2E&limit=1&indent=True";
+            String url = "https://kgsearch.googleapis.com/v1/entities:search?query="+parseChars(foods.get(i))+"&key=AIzaSyAKSXq2h_SdSyadKsBX1y3EChyaPv12W2E&limit=1&indent=True";
+            Log.i("URL", url);
             StringRequest request = new StringRequest(url, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
@@ -90,15 +94,28 @@ public class ResultActivity extends AppCompatActivity {
             String title = ja.getJSONObject(0).getJSONObject("result").getString("name");
             String imUrl = ja.getJSONObject(0).getJSONObject("result").getJSONObject("image").getString("contentUrl");
             String desc =  ja.getJSONObject(0).getJSONObject("result").getJSONObject("detailedDescription").getString("articleBody");
+            String type = "";
+
+            try{
+                type = ja.getJSONObject(0).getJSONObject("result").getString("description");
+            }catch (Exception e){
+                type = "none";
+            }
+
             Log.i("text",desc);
             FoodItemModel fi = new FoodItemModel();
             fi.setDesc(desc);
             fi.setImgUrl(imUrl);
             fi.setTitle(title);
-            foodModels.add(fi);
-            Toast.makeText(getBaseContext(), title, Toast.LENGTH_LONG);
+            fi.setType(type);
+            fi.setCalories(genCals());
+            if(isFood(type)){
+                foodModels.add(fi);
+            }
+            Toast.makeText(getBaseContext(), "Found "+foodModels.size()+" dishes", Toast.LENGTH_SHORT);
         } catch (JSONException e) {
             e.printStackTrace();
+            Log.i("Exception", "parseJsonData: "+response);
         }
         if(requestPending==0){
             //dialog.dismiss();
@@ -117,5 +134,30 @@ public class ResultActivity extends AppCompatActivity {
         }else{
             Log.i("text","size0");
         }
+    }
+    public boolean isFood(String type){
+        type = type.toUpperCase();
+        for(String item:type_dict){
+            if(item.equals(type))
+                return true;
+        }
+        return false;
+    }
+    public void initDict(){
+        type_dict.add("CAKE");
+        type_dict.add("DESERT");
+        type_dict.add("DISH");
+        type_dict.add("FOOD");
+    }
+    public String parseChars(String q){
+        q =q.replace(' ','+');
+        q =q.replace('&', '+');
+        q =q.replaceAll("\\d","");
+        return q;
+    }
+
+    public int genCals(){
+        Random r = new Random();
+        return r.nextInt(150)+250;
     }
 }
