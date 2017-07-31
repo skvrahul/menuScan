@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by skvrahul on 25/6/17.
@@ -38,7 +39,7 @@ public class FoodItemAdapter extends RecyclerView.Adapter<FoodItemAdapter.MyView
     public void onBindViewHolder(MyViewHolder holder, int position) {
         FoodItemModel foodItem = foods.get(position);
         holder.titleTV.setText(foodItem.getTitle());
-        //holder.caloriesTV.setText(foodItem.getCalories());
+        holder.caloriesTV.setText(foodItem.getServing()+" has "+foodItem.getCalories()+" calories");
         holder.descSV.setText(foodItem.getDesc());
         Log.i("picasso", "onBindViewHolder: "+foodItem.getImgUrl());
         Picasso.with(holder.imageIV.getContext()).load(foodItem.getImgUrl()).into(holder.imageIV);
@@ -55,5 +56,9 @@ public class FoodItemAdapter extends RecyclerView.Adapter<FoodItemAdapter.MyView
     @Override
     public int getItemCount() {
         return foods.size();
+    }
+    public int genCals(){
+        Random r = new Random();
+        return r.nextInt(400);
     }
 }

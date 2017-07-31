@@ -10,7 +10,26 @@ class FoodItemModel{
     private String Title;
     private String ImgUrl;
     private String Desc;
-    int calories;
+    private String Type;
+    private String calories;
+    private String serving;
+
+    public String getType() {
+        return Type;
+    }
+
+    public String getServing() {
+        return serving;
+    }
+
+    public void setServing(String serving) {
+        this.serving = serving;
+    }
+
+    public void setType(String type) {
+        Type = type;
+    }
+
     List<String> ingredients;
 
     public String getTitle() {
@@ -37,11 +56,11 @@ class FoodItemModel{
         Desc = desc;
     }
 
-    public int getCalories() {
+    public String getCalories() {
         return calories;
     }
 
-    public void setCalories(int calories) {
+    public void setCalories(String calories) {
         this.calories = calories;
     }
 
