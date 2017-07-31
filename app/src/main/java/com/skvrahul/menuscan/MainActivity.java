@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -42,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
         scanButton = (Button)findViewById(R.id.scanButton);
         scanButton.setOnClickListener(new View.OnClickListener() {
@@ -90,12 +91,17 @@ public class MainActivity extends AppCompatActivity {
                     SparseArray<TextBlock> textBlocks = textRecognizer.detect(imageFrame);
 
                     Log.i("textScan", "Found "+textBlocks.size()+" blocks");
+                    foods.clear();
                     processText(textBlocks);
                     for(String text:foods){
                         Log.i("textScan", text);
                     }
-                    resultsIntent.putStringArrayListExtra("foods",foods);
-                    startActivity(resultsIntent);
+                    if(resultsIntent!=null){
+                        resultsIntent.putStringArrayListExtra("foods",foods);
+                        startActivity(resultsIntent);
+                    }
+
+
                 }
 
             }catch (IOException e){
